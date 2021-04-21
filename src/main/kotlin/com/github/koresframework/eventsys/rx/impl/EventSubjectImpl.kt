@@ -25,13 +25,13 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.impl
+package com.github.koresframework.eventsys.rx.impl
 
-import com.github.projectsandstone.eventsys.event.Event
-import com.github.projectsandstone.eventsys.rx.EventSubject
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
-import io.reactivex.subjects.PublishSubject
+import com.github.koresframework.eventsys.event.Event
+import com.github.koresframework.eventsys.rx.EventSubject
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 class EventSubjectImpl<T: Event> : EventSubject<T>() {
     private val subject = PublishSubject.create<T>()
@@ -52,5 +52,5 @@ class EventSubjectImpl<T: Event> : EventSubject<T>() {
 
     override fun onError(e: Throwable) = this.subject.onError(e)
 
-    override fun subscribeActual(observer: Observer<in T>?) = this.subject.subscribeActual(observer)
+    override fun subscribeActual(observer: Observer<in T>?) = this.subject.subscribe(observer)
 }

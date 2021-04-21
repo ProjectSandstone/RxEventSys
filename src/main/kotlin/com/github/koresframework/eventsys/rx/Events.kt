@@ -25,33 +25,20 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.impl
+package com.github.koresframework.eventsys.rx
 
-import com.github.jonathanxd.iutils.type.TypeInfo
-import com.github.projectsandstone.eventsys.event.Event
-import com.github.projectsandstone.eventsys.event.EventListener
-import com.github.projectsandstone.eventsys.event.EventManager
-import com.github.projectsandstone.eventsys.rx.Events
-import io.reactivex.Observable
-import io.reactivex.subjects.Subject
+import com.github.koresframework.eventsys.event.Event
+import io.reactivex.rxjava3.core.Observable
+import java.lang.reflect.Type
 
-class EventsImpl(val eventManager: EventManager) : Events {
+/**
+ * Factory of event handling observables. These observables never receives complete state (onComplete)
+ */
+interface Events {
 
-    private val observables = mutableMapOf<TypeInfo<*>, Observable<*>>()
+    /**
+     * Creates observable handler of [eventType].
+     */
+    fun <T : Event> observable(eventType: Type): Observable<T>
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Event> observable(eventType: TypeInfo<T>): Observable<T> =
-            this.observables.computeIfAbsent(eventType) {
-                EventSubjectImpl<T>().also { registerListener(eventType, it) }
-            } as Observable<T>
-
-    private fun <T: Event> registerListener(eventType: TypeInfo<T>, subject: Subject<T>) {
-        this.eventManager.registerListener(this, eventType, EvtListener(subject))
-    }
-
-    private class EvtListener<T: Event>(val subject: Subject<T>) : EventListener<T> {
-        override fun onEvent(event: T, owner: Any) {
-            this.subject.onNext(event)
-        }
-    }
 }

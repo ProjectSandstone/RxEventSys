@@ -25,25 +25,9 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx
+package com.github.koresframework.eventsys.rx.ap
 
-import com.github.jonathanxd.iutils.type.TypeInfo
-import com.github.projectsandstone.eventsys.event.Event
-import io.reactivex.Observable
-
-/**
- * Factory of event handling observables. These observables never receives complete state (onComplete)
- */
-interface Events {
-
-    /**
-     * Creates observable handler of [eventType].
-     */
-    fun <T : Event> observable(eventType: Class<T>): Observable<T> = observable(TypeInfo.of(eventType))
-
-    /**
-     * Creates observable handler of [eventType].
-     */
-    fun <T : Event> observable(eventType: TypeInfo<T>): Observable<T>
-
+interface ObservableEventUnification {
+    fun value(): String
+    fun methodName(): String
 }

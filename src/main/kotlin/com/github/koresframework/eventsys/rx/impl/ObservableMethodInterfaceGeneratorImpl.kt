@@ -25,32 +25,32 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.impl
+package com.github.koresframework.eventsys.rx.impl
 
-import com.github.jonathanxd.codeapi.CodeSource
-import com.github.jonathanxd.codeapi.base.Access
-import com.github.jonathanxd.codeapi.base.MethodDeclaration
-import com.github.jonathanxd.codeapi.common.VariableRef
-import com.github.jonathanxd.codeapi.factory.*
-import com.github.jonathanxd.codeapi.util.asGeneric
-import com.github.jonathanxd.codeapi.util.conversion.toVariableAccess
-import com.github.jonathanxd.codeapi.util.conversion.typeSpec
-import com.github.jonathanxd.codeproxy.CodeProxy
-import com.github.jonathanxd.codeproxy.InvokeSuper
-import com.github.jonathanxd.codeproxy.gen.Custom
-import com.github.jonathanxd.codeproxy.gen.CustomHandlerGenerator
-import com.github.jonathanxd.codeproxy.gen.DirectInvocationCustom
-import com.github.jonathanxd.codeproxy.gen.GenEnv
-import com.github.jonathanxd.codeproxy.internals.Util
-import com.github.jonathanxd.iutils.type.TypeInfo
 import com.github.jonathanxd.iutils.type.TypeUtil
-import com.github.projectsandstone.eventsys.event.Event
-import com.github.projectsandstone.eventsys.event.annotation.TypeParam
-import com.github.projectsandstone.eventsys.rx.Events
-import com.github.projectsandstone.eventsys.rx.ObservableMethodInterfaceGenerator
-import com.github.projectsandstone.eventsys.rx.util.createTypeInfoWithBuilder
-import io.reactivex.Observable
+import com.github.jonathanxd.kores.Instructions
+import com.github.jonathanxd.kores.base.Access
+import com.github.jonathanxd.kores.base.MethodDeclaration
+import com.github.jonathanxd.kores.common.VariableRef
+import com.github.jonathanxd.kores.factory.*
+import com.github.jonathanxd.kores.type.asGeneric
+import com.github.jonathanxd.kores.util.conversion.toVariableAccess
+import com.github.jonathanxd.kores.util.conversion.typeSpec
+import com.github.jonathanxd.koresproxy.InvokeSuper
+import com.github.jonathanxd.koresproxy.KoresProxy
+import com.github.jonathanxd.koresproxy.gen.Custom
+import com.github.jonathanxd.koresproxy.gen.CustomHandlerGenerator
+import com.github.jonathanxd.koresproxy.gen.DirectInvocationCustom
+import com.github.jonathanxd.koresproxy.gen.GenEnv
+import com.github.jonathanxd.koresproxy.internals.Util
+import com.github.koresframework.eventsys.event.Event
+import com.github.koresframework.eventsys.event.annotation.TypeParam
+import com.github.koresframework.eventsys.gen.event.createGenericType
+import com.github.koresframework.eventsys.rx.Events
+import com.github.koresframework.eventsys.rx.ObservableMethodInterfaceGenerator
+import io.reactivex.rxjava3.core.Observable
 import java.lang.reflect.Method
+import java.lang.reflect.Type
 
 /**
  * Default implementation of [ObservableMethodInterfaceGenerator].
@@ -63,7 +63,7 @@ import java.lang.reflect.Method
 class ObservableMethodInterfaceGeneratorImpl(override val events: Events) : ObservableMethodInterfaceGenerator {
 
     override fun <T> create(itf: Class<T>): T =
-            CodeProxy.newProxyInstance<T>(arrayOf(), arrayOf(), {
+            KoresProxy.newProxyInstance<T>(arrayOf(), arrayOf(), {
                 it.addInterface(itf)
                         .classLoader(itf.classLoader)
                         .addCustomGenerator(InvokeSuper::class.java)
@@ -90,12 +90,12 @@ class ObservableMethodInterfaceGeneratorImpl(override val events: Events) : Obse
 
         object EventsInvoke : CustomHandlerGenerator {
             private val evts = VariableRef(Events::class.java, "events")
-            override fun handle(target: Method, methodDeclaration: MethodDeclaration, env: GenEnv): CodeSource {
+            override fun handle(target: Method, methodDeclaration: MethodDeclaration, env: GenEnv): Instructions {
                 if (target.declaringClass == Object::class.java) {
                     env.isInvokeHandler = false
                     env.isMayProceed = false
 
-                    return CodeSource.fromPart(returnValue(target.returnType,
+                    return Instructions.fromPart(returnValue(target.returnType,
                             invokeSpecial(target.declaringClass,
                                     Access.SUPER,
                                     target.name,
@@ -116,17 +116,22 @@ class ObservableMethodInterfaceGeneratorImpl(override val events: Events) : Obse
                             if (target.parameterCount == 1 && target.parameters[0].isAnnotationPresent(TypeParam::class.java))
                                 accessVariable(target.parameters[0].type, target.parameters[0].name)
                             else
-                                target.genericReturnType.asGeneric.bounds[0].type.createTypeInfoWithBuilder()
+                                createGenericType(target.genericReturnType.asGeneric.bounds[0].type)
 
-                    return CodeSource.fromPart(
-                            returnValue(Observable::class.java, accessThisField(Events::class.java, Util.getAdditionalPropertyFieldName(evts))
-                                    .invokeInterface(Events::class.java,
+
+                    return Instructions.fromPart(
+                            returnValue(Observable::class.java, accessThisField(
+                                Events::class.java, Util.getAdditionalPropertyFieldName(
+                                    evts
+                                ))
+                                    .invokeInterface(
+                                        Events::class.java,
                                             "observable",
-                                            typeSpec(Observable::class.java, TypeInfo::class.java),
+                                            typeSpec(Observable::class.java, Type::class.java),
                                             listOf(codeApiTypeInfo))))
                 }
 
-                return CodeSource.empty()
+                return Instructions.empty()
             }
         }
     }

@@ -25,15 +25,23 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.ap
+package com.github.koresframework.eventsys.rx
 
-import com.github.jonathanxd.codeapi.generic.GenericSignature
-import java.lang.reflect.Type
-import javax.lang.model.element.Element
-import javax.lang.model.element.TypeElement
+/**
+ * Generator of implementation of stub interfaces that provides `Observable<Event>` of event handlers.
+ * This is commonly used with interface specified in [ObservableEvent annotation][com.github.projectsandstone.eventsys.rx.ap.ObservableEvent].
+ *
+ * @see com.github.projectsandstone.eventsys.rx.impl.ObservableMethodInterfaceGeneratorImpl
+ */
+interface ObservableMethodInterfaceGenerator {
+    /**
+     * Events to use to generate observables
+     */
+    val events: Events
 
-data class ObservableEventElement(val typeName: String,
-                                  val methodName: String,
-                                  val signature: GenericSignature,
-                                  val type: Type,
-                                  val origin: TypeElement)
+    /**
+     * Generates implementation of [itf] and creates an instance.
+     */
+    fun <T> create(itf: Class<T>): T
+
+}

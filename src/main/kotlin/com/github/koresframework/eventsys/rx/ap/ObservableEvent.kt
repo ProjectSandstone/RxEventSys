@@ -25,12 +25,22 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx
+package com.github.koresframework.eventsys.rx.ap
 
-import com.github.projectsandstone.eventsys.event.Event
-import io.reactivex.subjects.Subject
+import com.github.koresframework.eventsys.ap.Factory
+import com.github.koresframework.eventsys.rx.ObservableMethodInterfaceGenerator
+import io.reactivex.rxjava3.core.Observable
 
 /**
- * Subject to publish events.
+ * Annotation used to enable generation of an abstract method in [value] that returns [Observable] handler of annotated event class.
+ *
+ * This annotation does a work similar to [Factory].
+ * The generated interface depends on [Observable Runtime Code Generation][ObservableMethodInterfaceGenerator] to be implemented.
+ *
+ * @property value Name of target class to add event listeners.
+ * @property methodName Name of the method of observable event method. Default is the same as de-capitalized annotated type.
  */
-abstract class EventSubject<T : Event> : Subject<T>()
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.SOURCE)
+annotation class ObservableEvent(val value: String,
+                                 val methodName: String = "")

@@ -25,34 +25,47 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.test
+package com.github.koresframework.eventsys.rx.test
 
-import com.github.jonathanxd.iutils.type.TypeInfo
-import com.github.projectsandstone.eventsys.ap.Factory
-import com.github.projectsandstone.eventsys.event.Event
-import com.github.projectsandstone.eventsys.event.annotation.Name
-import com.github.projectsandstone.eventsys.event.annotation.TypeParam
-import com.github.projectsandstone.eventsys.impl.DefaultEventManager
-import com.github.projectsandstone.eventsys.rx.Events
-import com.github.projectsandstone.eventsys.rx.impl.EventsImpl
-import com.github.projectsandstone.eventsys.rx.impl.ObservableMethodInterfaceGeneratorImpl
-import io.reactivex.Observable
+import com.github.koresframework.eventsys.ap.Factory
+import com.github.koresframework.eventsys.event.Event
+import com.github.koresframework.eventsys.event.EventListener
+import com.github.koresframework.eventsys.event.annotation.Name
+import com.github.koresframework.eventsys.event.annotation.TypeParam
+import com.github.koresframework.eventsys.gen.event.CommonEventGenerator
+import com.github.koresframework.eventsys.impl.CommonLogger
+import com.github.koresframework.eventsys.impl.DefaultEventManager
+import com.github.koresframework.eventsys.impl.PerChannelEventListenerRegistry
+import com.github.koresframework.eventsys.rx.Events
+import com.github.koresframework.eventsys.rx.impl.EventsImpl
+import com.github.koresframework.eventsys.rx.impl.ObservableMethodInterfaceGeneratorImpl
+import io.reactivex.rxjava3.core.Observable
 import org.junit.Assert
 import org.junit.Test
+import java.lang.reflect.Type
 
 class EventBusTest {
 
     @Test
     fun testObservableBus() {
-        val manager = DefaultEventManager()
-        val events: Events = EventsImpl(manager)
+        val sorter = Comparator.comparing(EventListener<*>::priority)
+        val logger = CommonLogger()
+        val commonEventGenerator = CommonEventGenerator(logger)
+
+        val eventListenerRegistry = PerChannelEventListenerRegistry(
+            sorter,
+            logger,
+            commonEventGenerator
+        )
+        val manager = DefaultEventManager(eventListenerRegistry)
+        val events: Events = EventsImpl(eventListenerRegistry)
         val gen = ObservableMethodInterfaceGeneratorImpl(events)
-        val factory = manager.eventGenerator.createFactory(EvtFactory::class.java)
+        val factory: EvtFactory = manager.eventGenerator.createFactory<EvtFactory>(EvtFactory::class.java).resolve()
         val myEvents = gen.create(MyEvents::class.java)
 
         val list = mutableListOf<Int>()
 
-        events.observable(MyEvent::class.java)
+        events.observable<MyEvent>(MyEvent::class.java)
                 .map { it.amount }
                 .filter { it > 9 }
                 .subscribe({ list += it }, { it.printStackTrace() })
@@ -78,7 +91,7 @@ class EventBusTest {
 
     interface MyEvents {
         fun myEvent(): Observable<MyEvent>
-        fun <T> myEvent2(@TypeParam type: TypeInfo<T>): Observable<MyGenericEvent<T>>
+        fun <T> myEvent2(@TypeParam type: Type): Observable<MyGenericEvent<T>>
     }
 
     interface MyGenericEvent<T> : Event {

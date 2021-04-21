@@ -25,24 +25,25 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.ap
+package com.github.koresframework.eventsys.rx.ap
 
-import com.github.jonathanxd.codeapi.base.*
-import com.github.jonathanxd.codeapi.base.Annotation
-import com.github.jonathanxd.codeapi.factory.parameter
-import com.github.jonathanxd.codeapi.type.Generic
 import com.github.jonathanxd.iutils.type.TypeInfo
-import com.github.projectsandstone.eventsys.ap.MethodDesc
-import com.github.projectsandstone.eventsys.ap.getUniqueName
-import com.github.projectsandstone.eventsys.event.annotation.TypeParam
-import com.github.projectsandstone.eventsys.gen.event.eventTypeInfoFieldName
-import io.reactivex.Observable
+import com.github.jonathanxd.kores.base.*
+import com.github.jonathanxd.kores.base.Annotation
+import com.github.jonathanxd.kores.base.Retention
+import com.github.jonathanxd.kores.factory.parameter
+import com.github.jonathanxd.kores.type.Generic
+import com.github.koresframework.eventsys.ap.MethodDesc
+import com.github.koresframework.eventsys.ap.getUniqueName
+import com.github.koresframework.eventsys.event.annotation.TypeParam
+import com.github.koresframework.eventsys.gen.event.eventTypeFieldName
+import io.reactivex.rxjava3.core.Observable
 
 object ObservableEventsInterfaceGenerator {
 
     fun processNamed(name: String, observableEvents: List<ObservableEventElement>): TypeDeclaration {
         return InterfaceDeclaration.Builder.builder()
-                .modifiers(CodeModifier.PUBLIC)
+                .modifiers(KoresModifier.PUBLIC)
                 .name(name)
                 .methods(createMethods(observableEvents))
                 .build()
@@ -55,20 +56,20 @@ object ObservableEventsInterfaceGenerator {
                     it.copy(name = getUniqueName(it, methods))
                 }
 
-                val parameters = mutableListOf<CodeParameter>()
+                val parameters = mutableListOf<KoresParameter>()
 
                 if (it.origin.typeParameters.isNotEmpty()) {
                     val typeInfoGeneric = Generic.type(TypeInfo::class.java).of(it.type)
-                    parameters += parameter(type = typeInfoGeneric, name = eventTypeInfoFieldName, annotations = listOf(
+                    parameters += parameter(type = typeInfoGeneric, name = eventTypeFieldName, annotations = listOf(
                             Annotation.Builder.builder()
                                     .type(TypeParam::class.java)
-                                    .visible(true)
+                                    .retention(Retention.RUNTIME)
                                     .build()
                     ))
                 }
 
                 MethodDeclaration.Builder.builder()
-                        .modifiers(CodeModifier.PUBLIC)
+                        .modifiers(KoresModifier.PUBLIC)
                         .genericSignature(it.signature)
                         .returnType(Generic.type(Observable::class.java).of(it.type))
                         .parameters(parameters)

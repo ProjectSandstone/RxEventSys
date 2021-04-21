@@ -25,16 +25,12 @@
  *      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *      THE SOFTWARE.
  */
-package com.github.projectsandstone.eventsys.rx.ap
+package com.github.koresframework.eventsys.rx.ap
 
-import com.github.jonathanxd.codeapi.extra.getUnificationInstance
-import com.github.jonathanxd.codeapi.generic.GenericSignature
-import com.github.jonathanxd.codeapi.source.process.PlainSourceGenerator
-import com.github.jonathanxd.codeapi.type.GenericType
-import com.github.jonathanxd.codeapi.util.`is`
-import com.github.jonathanxd.codeapi.util.concreteType
-import com.github.jonathanxd.codeapi.util.getCodeType
-import com.github.jonathanxd.codeapi.util.getCodeTypeFromTypeParameters
+import com.github.jonathanxd.kores.extra.getUnificationInstance
+import com.github.jonathanxd.kores.generic.GenericSignature
+import com.github.jonathanxd.kores.source.process.PlainSourceGenerator
+import com.github.jonathanxd.kores.type.*
 import java.io.IOException
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Filer
@@ -51,7 +47,7 @@ class AnnotationProcessor : AbstractProcessor() {
         val observableEvents =
                 elements.filterIsInstance<TypeElement>()
                         .flatMap { type ->
-                            val params = type.getCodeTypeFromTypeParameters(processingEnv.elementUtils)
+                            val params = type.getKoresTypeFromTypeParameters(processingEnv.elementUtils)
                             val signature =
                                     if (type.typeParameters.isEmpty()
                                             || params !is GenericType
@@ -112,7 +108,7 @@ class AnnotationProcessor : AbstractProcessor() {
 
     private fun getObservableAnnotations(element: Element): List<ObservableEventUnification> =
             element.annotationMirrors.filter {
-                it.annotationType.getCodeType(processingEnv.elementUtils).concreteType.`is`(ObservableEvent::class.java)
+                it.annotationType.getKoresType(processingEnv.elementUtils).concreteType.`is`(ObservableEvent::class.java)
             }.map {
                 getUnificationInstance(
                         it,
