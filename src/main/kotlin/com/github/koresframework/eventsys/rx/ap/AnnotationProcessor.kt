@@ -99,7 +99,7 @@ class AnnotationProcessor : AbstractProcessor() {
 
 
     override fun getSupportedAnnotationTypes(): MutableSet<String> {
-        return mutableSetOf("com.github.projectsandstone.eventsys.rx.ap.ObservableEvent")
+        return mutableSetOf("com.github.koresframework.eventsys.rx.ap.ObservableEvent")
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
