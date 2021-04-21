@@ -5,8 +5,9 @@ Implementation of [RxJava](https://github.com/ReactiveX/RxJava) `Observer` as an
 # Usage example:
 
 ```java
+EventListenerRegistry registry = ...;
 EventManager manager = ...;
-Events events = new EventsImpl(manager);
+Events events = new EventsImpl(registry);
 events.observable(ConnectEvent.class)
         .map(ConnectEvent::getUser)
         .filter(user -> user.getAge() >= 18)
